@@ -384,101 +384,97 @@ class Firework {
         const outline = [];
         const fill = [];
         
-        // Lilie mit 6 Blütenblättern - stilisiert nach Bundeslilie
-        const petalCount = 6;
-        const centerRadius = 3;
-        const petalLength = 25;
-        const petalWidth = 8;
+        // Authentic Fleur-de-lis / Pfadfinder lily shape
         
-        // Erstelle 6 spitze Blütenblätter
-        for (let petal = 0; petal < petalCount; petal++) {
-            const baseAngle = (petal / petalCount) * Math.PI * 2 - Math.PI / 2; // Start oben
+        // Central upward petal - tall and narrow, pointed top
+        for (let i = 0; i <= 40; i++) {
+            const t = i / 40;
+            const y = -25 + t * 35; // from top to middle
+            const width = 4 * Math.sin(t * Math.PI) * (1 - t * 0.3); // narrower at top
             
-            // Jedes Blütenblatt als spitze Ellipse
-            for (let i = 0; i <= 30; i++) {
-                const t = i / 30; // 0 bis 1
-                
-                // Blütenblatt-Form: spitz zulaufend
-                const distanceFromCenter = centerRadius + t * petalLength;
-                const currentWidth = Math.sin(t * Math.PI) * petalWidth;
-                
-                // Linke und rechte Seite des Blütenblatts
-                for (let side = -1; side <= 1; side += 2) {
-                    const sideAngle = baseAngle + (side * currentWidth / distanceFromCenter);
-                    const x = Math.cos(sideAngle) * distanceFromCenter;
-                    const y = Math.sin(sideAngle) * distanceFromCenter;
-                    
-                    outline.push({x: x, y: y});
-                    // Dickere Linien für bessere Sichtbarkeit
-                    outline.push({x: x + 0.5, y: y});
-                    outline.push({x: x - 0.5, y: y});
-                }
-            }
-            
-            // Blütenblatt-Spitze verstärken
-            const tipX = Math.cos(baseAngle) * (centerRadius + petalLength);
-            const tipY = Math.sin(baseAngle) * (centerRadius + petalLength);
-            for (let i = 0; i < 5; i++) {
-                outline.push({x: tipX + (Math.random() - 0.5), y: tipY + (Math.random() - 0.5)});
-            }
+            outline.push({x: -width, y: y});
+            outline.push({x: width, y: y});
+            outline.push({x: -width - 0.5, y: y}); // thicker
+            outline.push({x: width + 0.5, y: y});
         }
         
-        // Zentrale Blütenmitte (Stempel und Staubgefäße)
-        for (let i = 0; i <= 20; i++) {
-            const angle = (i / 20) * Math.PI * 2;
-            const x = Math.cos(angle) * centerRadius;
-            const y = Math.sin(angle) * centerRadius;
+        // Left curved petal - characteristic fleur-de-lis curve
+        for (let i = 0; i <= 30; i++) {
+            const t = i / 30;
+            const angle = t * Math.PI * 0.6 + Math.PI * 0.7; // curved outward
+            const radius = 8 + t * 8;
+            const x = Math.cos(angle) * radius - 12;
+            const y = Math.sin(angle) * radius - 5;
+            
             outline.push({x: x, y: y});
-            outline.push({x: x + 1, y: y}); // Dicker
-            outline.push({x: x - 1, y: y});
+            outline.push({x: x - 0.5, y: y}); // thicker
+            outline.push({x: x + 0.5, y: y});
         }
         
-        // Staubgefäße (kleine Punkte um das Zentrum)
-        for (let i = 0; i < 6; i++) {
-            const angle = (i / 6) * Math.PI * 2;
-            const stamenX = Math.cos(angle) * (centerRadius + 4);
-            const stamenY = Math.sin(angle) * (centerRadius + 4);
+        // Right curved petal - mirror of left
+        for (let i = 0; i <= 30; i++) {
+            const t = i / 30;
+            const angle = t * Math.PI * 0.6 + Math.PI * 0.4; // curved outward
+            const radius = 8 + t * 8;
+            const x = Math.cos(angle) * radius + 12;
+            const y = Math.sin(angle) * radius - 5;
             
-            for (let j = 0; j < 3; j++) {
-                outline.push({x: stamenX + j - 1, y: stamenY});
-                outline.push({x: stamenX, y: stamenY + j - 1});
-            }
+            outline.push({x: x, y: y});
+            outline.push({x: x - 0.5, y: y}); // thicker
+            outline.push({x: x + 0.5, y: y});
         }
         
-        // Blütenblatt-Verbindungslinien (für Struktur)
-        for (let petal = 0; petal < petalCount; petal++) {
-            const angle = (petal / petalCount) * Math.PI * 2 - Math.PI / 2;
-            const midX = Math.cos(angle) * (centerRadius + petalLength * 0.5);
-            const midY = Math.sin(angle) * (centerRadius + petalLength * 0.5);
-            
-            // Linie vom Zentrum zur Blütenblatt-Mitte
-            for (let t = 0; t <= 10; t++) {
-                const x = (midX * t) / 10;
-                const y = (midY * t) / 10;
-                outline.push({x: x, y: y});
-            }
+        // Connect the three petals at the base
+        const baseConnections = [
+            // Center to left base
+            {x: 0, y: 10}, {x: -2, y: 8}, {x: -4, y: 6}, {x: -6, y: 4}, {x: -8, y: 2},
+            // Center to right base  
+            {x: 0, y: 10}, {x: 2, y: 8}, {x: 4, y: 6}, {x: 6, y: 4}, {x: 8, y: 2},
+            // Base reinforcement
+            {x: -8, y: 2}, {x: -6, y: 2}, {x: -4, y: 2}, {x: -2, y: 2}, 
+            {x: 0, y: 2}, {x: 2, y: 2}, {x: 4, y: 2}, {x: 6, y: 2}, {x: 8, y: 2}
+        ];
+        
+        baseConnections.forEach(point => {
+            outline.push(point);
+            outline.push({x: point.x + 0.5, y: point.y});
+            outline.push({x: point.x - 0.5, y: point.y});
+        });
+        
+        // Add the characteristic "stem" or base of fleur-de-lis
+        for (let i = 0; i <= 15; i++) {
+            const y = 10 + i;
+            const width = 2 - i * 0.1;
+            outline.push({x: -width, y: y});
+            outline.push({x: width, y: y});
+            outline.push({x: 0, y: y}); // center line
         }
         
-        // Sparsame Fill-Punkte nur in den Blütenblättern
-        for (let petal = 0; petal < petalCount; petal++) {
-            const baseAngle = (petal / petalCount) * Math.PI * 2 - Math.PI / 2;
-            
-            // Nur wenige Fill-Punkte pro Blütenblatt
-            for (let r = centerRadius + 5; r < centerRadius + petalLength - 5; r += 4) {
-                for (let w = -3; w <= 3; w += 3) {
-                    const angle = baseAngle + (w / r);
-                    const x = Math.cos(angle) * r;
-                    const y = Math.sin(angle) * r;
+        // Petal tips reinforcement
+        const tipPoints = [
+            // Center petal tip
+            {x: 0, y: -25}, {x: -1, y: -24}, {x: 1, y: -24}, {x: 0, y: -23},
+            // Left petal tip area
+            {x: -16, y: -8}, {x: -17, y: -7}, {x: -15, y: -7}, {x: -16, y: -6},
+            // Right petal tip area  
+            {x: 16, y: -8}, {x: 17, y: -7}, {x: 15, y: -7}, {x: 16, y: -6}
+        ];
+        
+        tipPoints.forEach(point => outline.push(point));
+        
+        // Minimal fill for the center and base
+        for (let y = -15; y <= 15; y += 4) {
+            for (let x = -3; x <= 3; x += 3) {
+                if (y < 5 || Math.abs(x) <= 1) { // center column and upper area
                     fill.push({x: x, y: y});
                 }
             }
         }
         
-        // Zentrum fill
-        for (let x = -2; x <= 2; x += 2) {
-            for (let y = -2; y <= 2; y += 2) {
-                fill.push({x: x, y: y});
-            }
+        // Fill for petal areas
+        for (let i = 0; i < 8; i++) {
+            fill.push({x: -10 + Math.random() * 4, y: -2 + Math.random() * 4}); // left petal
+            fill.push({x: 6 + Math.random() * 4, y: -2 + Math.random() * 4});   // right petal
         }
         
         return {outline, fill};
