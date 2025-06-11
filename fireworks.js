@@ -106,7 +106,7 @@ class Firework {
     }
     
     createAnimalShape() {
-        const animals = ['butterfly', 'bird', 'fish', 'star', 'heart'];
+        const animals = ['fish', 'star', 'heart', 'lily'];
         const animal = animals[Math.floor(Math.random() * animals.length)];
         const scale = 1.4 + Math.random() * 0.4; // Much bigger for better visibility
         
@@ -114,16 +114,6 @@ class Firework {
         let fillPoints = [];
         
         switch(animal) {
-            case 'butterfly':
-                const butterflyData = this.getButterflyShape();
-                outlinePoints = butterflyData.outline;
-                fillPoints = butterflyData.fill;
-                break;
-            case 'bird':
-                const birdData = this.getBirdShape();
-                outlinePoints = birdData.outline;
-                fillPoints = birdData.fill;
-                break;
             case 'fish':
                 const fishData = this.getFishShape();
                 outlinePoints = fishData.outline;
@@ -138,6 +128,11 @@ class Firework {
                 const heartData = this.getHeartShape();
                 outlinePoints = heartData.outline;
                 fillPoints = heartData.fill;
+                break;
+            case 'lily':
+                const lilyData = this.getLilyShape();
+                outlinePoints = lilyData.outline;
+                fillPoints = lilyData.fill;
                 break;
         }
         
@@ -211,189 +206,7 @@ class Firework {
         return colors[Math.floor(Math.random() * colors.length)];
     }
     
-    getButterflyShape() {
-        const outline = [];
-        const fill = [];
-        
-        // Butterfly body outline - OPTIMIZED density
-        for (let i = -22; i <= 22; i += 1) {
-            outline.push({x: -1, y: i});
-            outline.push({x: 0, y: i});
-            outline.push({x: 1, y: i});
-        }
-        
-        // Left upper wing outline - optimized curved line
-        for (let i = 0; i <= 40; i++) {
-            const t = i / 40;
-            const angle = t * Math.PI;
-            const x = -Math.sin(angle) * 30;
-            const y = -Math.cos(angle) * 20 - 8;
-            outline.push({x: x, y: y});
-            outline.push({x: x + 1, y: y}); // Thicker line
-            outline.push({x: x - 1, y: y});
-        }
-        
-        // Right upper wing outline
-        for (let i = 0; i <= 40; i++) {
-            const t = i / 40;
-            const angle = t * Math.PI;
-            const x = Math.sin(angle) * 30;
-            const y = -Math.cos(angle) * 20 - 8;
-            outline.push({x: x, y: y});
-            outline.push({x: x + 1, y: y}); // Thicker line
-            outline.push({x: x - 1, y: y});
-        }
-        
-        // Left lower wing outline
-        for (let i = 0; i <= 35; i++) {
-            const t = i / 35;
-            const angle = t * Math.PI;
-            const x = -Math.sin(angle) * 24;
-            const y = Math.cos(angle) * 16 + 12;
-            outline.push({x: x, y: y});
-            outline.push({x: x + 1, y: y}); // Thicker line
-            outline.push({x: x - 1, y: y});
-        }
-        
-        // Right lower wing outline  
-        for (let i = 0; i <= 35; i++) {
-            const t = i / 35;
-            const angle = t * Math.PI;
-            const x = Math.sin(angle) * 24;
-            const y = Math.cos(angle) * 16 + 12;
-            outline.push({x: x, y: y});
-            outline.push({x: x + 1, y: y}); // Thicker line
-            outline.push({x: x - 1, y: y});
-        }
-        
-        // Wing connection lines - thick
-        for (let i = -8; i <= 8; i += 1) {
-            outline.push({x: i, y: -8}); // horizontal line
-            outline.push({x: i, y: 12}); // horizontal line
-        }
-        
-        // Antennae
-        for (let i = 0; i <= 10; i++) {
-            outline.push({x: -3 - i * 0.5, y: -22 - i});
-            outline.push({x: 3 + i * 0.5, y: -22 - i});
-        }
-        
-        // Minimal fill - just body center
-        for (let x = -2; x <= 2; x += 2) {
-            for (let y = -15; y <= 15; y += 3) {
-                fill.push({x: x, y: y});
-            }
-        }
-        
-        return {outline, fill};
-    }
-    
-    isInsideButterfly(x, y) {
-        // Simple butterfly shape detection
-        if (Math.abs(x) < 2 && y >= -20 && y <= 20) return true; // body
-        
-        // Upper wings
-        if (y < -5 && y > -25) {
-            const wingWidth = Math.sin(Math.abs(y + 5) / 18 * Math.PI) * 25;
-            if (Math.abs(x) < wingWidth) return true;
-        }
-        
-        // Lower wings
-        if (y > 5 && y < 25) {
-            const wingWidth = Math.sin((25 - y) / 15 * Math.PI) * 20;
-            if (Math.abs(x) < wingWidth) return true;
-        }
-        
-        return false;
-    }
-    
-    getBirdShape() {
-        const outline = [];
-        const fill = [];
-        
-        // Bird body outline - thick line
-        for (let i = -15; i <= 15; i += 0.5) {
-            outline.push({x: i, y: 3});
-            outline.push({x: i, y: 2});
-            outline.push({x: i, y: 1});
-            outline.push({x: i, y: 0});
-            outline.push({x: i, y: -1});
-            outline.push({x: i, y: -2});
-            outline.push({x: i, y: -3});
-        }
-        
-        // Left wing outline - detailed
-        for (let i = 0; i <= 40; i++) {
-            const x = -18 + i * 0.8;
-            const y = -Math.abs(x + 2) * 0.5 - 10;
-            outline.push({x: x, y: y});
-            outline.push({x: x, y: y + 1}); // Thicker
-            outline.push({x: x, y: y - 1});
-        }
-        
-        // Right wing outline  
-        for (let i = 0; i <= 40; i++) {
-            const x = -2 + i * 0.8;
-            const y = -Math.abs(x - 2) * 0.5 - 10;
-            outline.push({x: x, y: y});
-            outline.push({x: x, y: y + 1}); // Thicker
-            outline.push({x: x, y: y - 1});
-        }
-        
-        // Head outline - thick circle
-        for (let i = 0; i <= 40; i++) {
-            const angle = (i / 40) * Math.PI * 2;
-            const x = Math.cos(angle) * 7 + 18;
-            const y = Math.sin(angle) * 7;
-            outline.push({x: x, y: y});
-            outline.push({x: x + 1, y: y}); // Thicker
-            outline.push({x: x - 1, y: y});
-        }
-        
-        // Beak - thick triangle
-        const beakPoints = [
-            {x: 25, y: 0}, {x: 26, y: 0}, {x: 27, y: 0},
-            {x: 24, y: 1}, {x: 25, y: 1}, {x: 26, y: 1},
-            {x: 24, y: -1}, {x: 25, y: -1}, {x: 26, y: -1}
-        ];
-        beakPoints.forEach(p => outline.push(p));
-        
-        // Tail feathers - defined lines
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 3; j++) {
-                outline.push({x: -18 - i * 1.5, y: (i * 0.8) - 3 + j});
-                outline.push({x: -18 - i * 1.5, y: -(i * 0.8) + 3 - j});
-            }
-        }
-        
-        // Eye
-        outline.push({x: 20, y: 2});
-        outline.push({x: 20, y: 1});
-        outline.push({x: 19, y: 2});
-        
-        // Minimal fill - just body center
-        for (let x = -10; x <= 10; x += 4) {
-            for (let y = -1; y <= 1; y += 1) {
-                fill.push({x: x, y: y});
-            }
-        }
-        
-        return {outline, fill};
-    }
-    
-    isInsideBird(x, y) {
-        // Body
-        if (x >= -12 && x <= 12 && Math.abs(y) <= 2) return true;
-        
-        // Head
-        const headDist = Math.sqrt((x - 15) * (x - 15) + y * y);
-        if (headDist <= 5) return true;
-        
-        // Wings
-        if (x >= -15 && x <= 15 && y <= -4 && y >= -Math.abs(x) * 0.4 - 8) return true;
-        
-        return false;
-    }
+
     
     getFishShape() {
         const outline = [];
@@ -565,6 +378,110 @@ class Firework {
         // Lower part (triangle-like)
         const bottomWidth = 16 - Math.abs(normalizedY) * 1.2;
         return Math.abs(normalizedX) <= bottomWidth;
+    }
+    
+    getLilyShape() {
+        const outline = [];
+        const fill = [];
+        
+        // Lilie mit 6 Blütenblättern - stilisiert nach Bundeslilie
+        const petalCount = 6;
+        const centerRadius = 3;
+        const petalLength = 25;
+        const petalWidth = 8;
+        
+        // Erstelle 6 spitze Blütenblätter
+        for (let petal = 0; petal < petalCount; petal++) {
+            const baseAngle = (petal / petalCount) * Math.PI * 2 - Math.PI / 2; // Start oben
+            
+            // Jedes Blütenblatt als spitze Ellipse
+            for (let i = 0; i <= 30; i++) {
+                const t = i / 30; // 0 bis 1
+                
+                // Blütenblatt-Form: spitz zulaufend
+                const distanceFromCenter = centerRadius + t * petalLength;
+                const currentWidth = Math.sin(t * Math.PI) * petalWidth;
+                
+                // Linke und rechte Seite des Blütenblatts
+                for (let side = -1; side <= 1; side += 2) {
+                    const sideAngle = baseAngle + (side * currentWidth / distanceFromCenter);
+                    const x = Math.cos(sideAngle) * distanceFromCenter;
+                    const y = Math.sin(sideAngle) * distanceFromCenter;
+                    
+                    outline.push({x: x, y: y});
+                    // Dickere Linien für bessere Sichtbarkeit
+                    outline.push({x: x + 0.5, y: y});
+                    outline.push({x: x - 0.5, y: y});
+                }
+            }
+            
+            // Blütenblatt-Spitze verstärken
+            const tipX = Math.cos(baseAngle) * (centerRadius + petalLength);
+            const tipY = Math.sin(baseAngle) * (centerRadius + petalLength);
+            for (let i = 0; i < 5; i++) {
+                outline.push({x: tipX + (Math.random() - 0.5), y: tipY + (Math.random() - 0.5)});
+            }
+        }
+        
+        // Zentrale Blütenmitte (Stempel und Staubgefäße)
+        for (let i = 0; i <= 20; i++) {
+            const angle = (i / 20) * Math.PI * 2;
+            const x = Math.cos(angle) * centerRadius;
+            const y = Math.sin(angle) * centerRadius;
+            outline.push({x: x, y: y});
+            outline.push({x: x + 1, y: y}); // Dicker
+            outline.push({x: x - 1, y: y});
+        }
+        
+        // Staubgefäße (kleine Punkte um das Zentrum)
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            const stamenX = Math.cos(angle) * (centerRadius + 4);
+            const stamenY = Math.sin(angle) * (centerRadius + 4);
+            
+            for (let j = 0; j < 3; j++) {
+                outline.push({x: stamenX + j - 1, y: stamenY});
+                outline.push({x: stamenX, y: stamenY + j - 1});
+            }
+        }
+        
+        // Blütenblatt-Verbindungslinien (für Struktur)
+        for (let petal = 0; petal < petalCount; petal++) {
+            const angle = (petal / petalCount) * Math.PI * 2 - Math.PI / 2;
+            const midX = Math.cos(angle) * (centerRadius + petalLength * 0.5);
+            const midY = Math.sin(angle) * (centerRadius + petalLength * 0.5);
+            
+            // Linie vom Zentrum zur Blütenblatt-Mitte
+            for (let t = 0; t <= 10; t++) {
+                const x = (midX * t) / 10;
+                const y = (midY * t) / 10;
+                outline.push({x: x, y: y});
+            }
+        }
+        
+        // Sparsame Fill-Punkte nur in den Blütenblättern
+        for (let petal = 0; petal < petalCount; petal++) {
+            const baseAngle = (petal / petalCount) * Math.PI * 2 - Math.PI / 2;
+            
+            // Nur wenige Fill-Punkte pro Blütenblatt
+            for (let r = centerRadius + 5; r < centerRadius + petalLength - 5; r += 4) {
+                for (let w = -3; w <= 3; w += 3) {
+                    const angle = baseAngle + (w / r);
+                    const x = Math.cos(angle) * r;
+                    const y = Math.sin(angle) * r;
+                    fill.push({x: x, y: y});
+                }
+            }
+        }
+        
+        // Zentrum fill
+        for (let x = -2; x <= 2; x += 2) {
+            for (let y = -2; y <= 2; y += 2) {
+                fill.push({x: x, y: y});
+            }
+        }
+        
+        return {outline, fill};
     }
     
     draw(ctx) {
