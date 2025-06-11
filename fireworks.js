@@ -71,8 +71,8 @@ class Firework {
         if (this.type === 'animal') {
             this.createAnimalShape();
         } else {
-            // Create explosion particles
-            const particleCount = Math.random() * 50 + 50;
+            // Create explosion particles - OPTIMIZED
+            const particleCount = Math.min(Math.random() * 40 + 30, 50); // Fewer particles
             for (let i = 0; i < particleCount; i++) {
                 const angle = (Math.PI * 2 * i) / particleCount;
                 const velocity = Math.random() * 8 + 2;
@@ -82,24 +82,24 @@ class Firework {
                     y: this.rocket.y,
                     vx: Math.cos(angle) * velocity,
                     vy: Math.sin(angle) * velocity,
-                    life: Math.random() * 60 + 40,
-                    maxLife: Math.random() * 60 + 40,
+                    life: Math.random() * 50 + 35, // Shorter life for performance
+                    maxLife: Math.random() * 50 + 35,
                     color: this.color,
-                    size: Math.random() * 3 + 1
+                    size: Math.random() * 2.5 + 1.5
                 });
             }
             
-            // Add some sparkles
-            for (let i = 0; i < 20; i++) {
+            // Add fewer sparkles
+            for (let i = 0; i < 12; i++) {
                 this.particles.push({
                     x: this.rocket.x + (Math.random() - 0.5) * 20,
                     y: this.rocket.y + (Math.random() - 0.5) * 20,
-                    vx: (Math.random() - 0.5) * 4,
-                    vy: (Math.random() - 0.5) * 4,
-                    life: Math.random() * 30 + 20,
-                    maxLife: Math.random() * 30 + 20,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: (Math.random() - 0.5) * 3,
+                    life: Math.random() * 25 + 15,
+                    maxLife: Math.random() * 25 + 15,
                     color: '#ffffff',
-                    size: Math.random() * 2 + 0.5
+                    size: Math.random() * 1.5 + 0.8
                 });
             }
         }
@@ -108,52 +108,89 @@ class Firework {
     createAnimalShape() {
         const animals = ['butterfly', 'bird', 'fish', 'star', 'heart'];
         const animal = animals[Math.floor(Math.random() * animals.length)];
-        const scale = 0.8 + Math.random() * 0.4; // Random size between 0.8 and 1.2
+        const scale = 1.4 + Math.random() * 0.4; // Much bigger for better visibility
         
-        let shape = [];
+        let outlinePoints = [];
+        let fillPoints = [];
+        
         switch(animal) {
             case 'butterfly':
-                shape = this.getButterflyShape();
+                const butterflyData = this.getButterflyShape();
+                outlinePoints = butterflyData.outline;
+                fillPoints = butterflyData.fill;
                 break;
             case 'bird':
-                shape = this.getBirdShape();
+                const birdData = this.getBirdShape();
+                outlinePoints = birdData.outline;
+                fillPoints = birdData.fill;
                 break;
             case 'fish':
-                shape = this.getFishShape();
+                const fishData = this.getFishShape();
+                outlinePoints = fishData.outline;
+                fillPoints = fishData.fill;
                 break;
             case 'star':
-                shape = this.getStarShape();
+                const starData = this.getStarShape();
+                outlinePoints = starData.outline;
+                fillPoints = starData.fill;
                 break;
             case 'heart':
-                shape = this.getHeartShape();
+                const heartData = this.getHeartShape();
+                outlinePoints = heartData.outline;
+                fillPoints = heartData.fill;
                 break;
         }
         
-        // Create particles for each point in the shape
-        shape.forEach(point => {
+        const animalColor = this.getAnimalColor();
+        const outlineColor = this.getBrightOutlineColor();
+        
+        // Create bright outline particles - OPTIMIZED and STATIONARY
+        const maxOutlineParticles = Math.min(outlinePoints.length, 300); // Limit outline particles
+        for (let i = 0; i < maxOutlineParticles; i++) {
+            const point = outlinePoints[Math.floor(i * outlinePoints.length / maxOutlineParticles)];
             this.particles.push({
                 x: this.rocket.x + point.x * scale,
                 y: this.rocket.y + point.y * scale,
-                vx: (Math.random() - 0.5) * 2,
-                vy: (Math.random() - 0.5) * 2,
-                life: Math.random() * 120 + 100, // Longer life for animals
-                maxLife: Math.random() * 120 + 100,
-                color: this.getAnimalColor(),
-                size: Math.random() * 2 + 1.5
+                vx: (Math.random() - 0.5) * 0.1, // Even less movement for performance
+                vy: (Math.random() - 0.5) * 0.1,
+                life: Math.random() * 180 + 120, // Slightly shorter for performance
+                maxLife: Math.random() * 180 + 120,
+                color: outlineColor,
+                size: Math.random() * 0.3 + 3.2, // Consistent bigger size
+                isOutline: true
             });
-        });
+        }
         
-        // Add some sparkles around the animal
-        for (let i = 0; i < 30; i++) {
+        // Create fill particles (much fewer for performance)
+        const maxFillParticles = Math.min(fillPoints.length, 60); // Limit fill particles
+        for (let i = 0; i < maxFillParticles; i++) {
+            if (Math.random() < 0.5) { // Only 50% of already limited fill points
+                const point = fillPoints[Math.floor(i * fillPoints.length / maxFillParticles)];
+                this.particles.push({
+                    x: this.rocket.x + point.x * scale,
+                    y: this.rocket.y + point.y * scale,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    life: Math.random() * 100 + 80,
+                    maxLife: Math.random() * 100 + 80,
+                    color: animalColor,
+                    size: Math.random() * 0.4 + 1.8,
+                    isOutline: false
+                });
+            }
+        }
+        
+        // Add fewer sparkles for performance
+        for (let i = 0; i < 15; i++) {
             this.particles.push({
-                x: this.rocket.x + (Math.random() - 0.5) * 100,
-                y: this.rocket.y + (Math.random() - 0.5) * 100,
-                vx: (Math.random() - 0.5) * 3,
-                vy: (Math.random() - 0.5) * 3,
-                life: Math.random() * 60 + 40,
-                maxLife: Math.random() * 60 + 40,
+                x: this.rocket.x + (Math.random() - 0.5) * 100 * scale,
+                y: this.rocket.y + (Math.random() - 0.5) * 100 * scale,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5,
+                life: Math.random() * 50 + 30,
+                maxLife: Math.random() * 50 + 30,
                 color: '#ffffff',
-                size: Math.random() * 1.5 + 0.5
+                size: Math.random() * 0.8 + 0.8
             });
         }
     }
@@ -166,117 +203,368 @@ class Firework {
         return colors[Math.floor(Math.random() * colors.length)];
     }
     
+    getBrightOutlineColor() {
+        const colors = [
+            '#ffffff', '#ffff00', '#00ffff', '#ff69b4', '#00ff00',
+            '#ffa500', '#ff1493', '#7fff00', '#ff4500', '#1e90ff'
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
     getButterflyShape() {
-        const shape = [];
-        // Butterfly body
-        for (let i = -15; i <= 15; i += 3) {
-            shape.push({x: 0, y: i});
+        const outline = [];
+        const fill = [];
+        
+        // Butterfly body outline - OPTIMIZED density
+        for (let i = -22; i <= 22; i += 1) {
+            outline.push({x: -1, y: i});
+            outline.push({x: 0, y: i});
+            outline.push({x: 1, y: i});
         }
         
-        // Left wing (upper)
-        for (let i = 0; i < 20; i++) {
-            const angle = (i / 19) * Math.PI;
-            shape.push({x: -Math.sin(angle) * 25, y: -Math.cos(angle) * 15 - 5});
+        // Left upper wing outline - optimized curved line
+        for (let i = 0; i <= 40; i++) {
+            const t = i / 40;
+            const angle = t * Math.PI;
+            const x = -Math.sin(angle) * 30;
+            const y = -Math.cos(angle) * 20 - 8;
+            outline.push({x: x, y: y});
+            outline.push({x: x + 1, y: y}); // Thicker line
+            outline.push({x: x - 1, y: y});
         }
         
-        // Right wing (upper)
-        for (let i = 0; i < 20; i++) {
-            const angle = (i / 19) * Math.PI;
-            shape.push({x: Math.sin(angle) * 25, y: -Math.cos(angle) * 15 - 5});
+        // Right upper wing outline
+        for (let i = 0; i <= 40; i++) {
+            const t = i / 40;
+            const angle = t * Math.PI;
+            const x = Math.sin(angle) * 30;
+            const y = -Math.cos(angle) * 20 - 8;
+            outline.push({x: x, y: y});
+            outline.push({x: x + 1, y: y}); // Thicker line
+            outline.push({x: x - 1, y: y});
         }
         
-        // Left wing (lower)
-        for (let i = 0; i < 15; i++) {
-            const angle = (i / 14) * Math.PI;
-            shape.push({x: -Math.sin(angle) * 20, y: Math.cos(angle) * 12 + 8});
+        // Left lower wing outline
+        for (let i = 0; i <= 35; i++) {
+            const t = i / 35;
+            const angle = t * Math.PI;
+            const x = -Math.sin(angle) * 24;
+            const y = Math.cos(angle) * 16 + 12;
+            outline.push({x: x, y: y});
+            outline.push({x: x + 1, y: y}); // Thicker line
+            outline.push({x: x - 1, y: y});
         }
         
-        // Right wing (lower)
-        for (let i = 0; i < 15; i++) {
-            const angle = (i / 14) * Math.PI;
-            shape.push({x: Math.sin(angle) * 20, y: Math.cos(angle) * 12 + 8});
+        // Right lower wing outline  
+        for (let i = 0; i <= 35; i++) {
+            const t = i / 35;
+            const angle = t * Math.PI;
+            const x = Math.sin(angle) * 24;
+            const y = Math.cos(angle) * 16 + 12;
+            outline.push({x: x, y: y});
+            outline.push({x: x + 1, y: y}); // Thicker line
+            outline.push({x: x - 1, y: y});
         }
         
-        return shape;
-    }
-    
-    getBirdShape() {
-        const shape = [];
-        // Bird body
-        for (let i = -10; i <= 10; i += 2) {
-            shape.push({x: i, y: 0});
+        // Wing connection lines - thick
+        for (let i = -8; i <= 8; i += 1) {
+            outline.push({x: i, y: -8}); // horizontal line
+            outline.push({x: i, y: 12}); // horizontal line
         }
         
-        // Wings
-        for (let i = 0; i < 15; i++) {
-            const x = i * 2 - 15;
-            const y = -Math.abs(x) * 0.3 - 5;
-            shape.push({x: x, y: y});
-            shape.push({x: -x, y: y});
+        // Antennae
+        for (let i = 0; i <= 10; i++) {
+            outline.push({x: -3 - i * 0.5, y: -22 - i});
+            outline.push({x: 3 + i * 0.5, y: -22 - i});
         }
         
-        // Head
-        for (let i = 0; i < 8; i++) {
-            const angle = (i / 7) * Math.PI * 2;
-            shape.push({x: Math.cos(angle) * 5 + 12, y: Math.sin(angle) * 5});
-        }
-        
-        return shape;
-    }
-    
-    getFishShape() {
-        const shape = [];
-        // Fish body
-        for (let i = -15; i <= 15; i += 2) {
-            const width = 8 - Math.abs(i) * 0.3;
-            for (let j = -width; j <= width; j += 3) {
-                shape.push({x: i, y: j});
+        // Minimal fill - just body center
+        for (let x = -2; x <= 2; x += 2) {
+            for (let y = -15; y <= 15; y += 3) {
+                fill.push({x: x, y: y});
             }
         }
         
-        // Tail
-        for (let i = 0; i < 10; i++) {
-            shape.push({x: -20 - i, y: -8 + i * 1.6});
-            shape.push({x: -20 - i, y: 8 - i * 1.6});
+        return {outline, fill};
+    }
+    
+    isInsideButterfly(x, y) {
+        // Simple butterfly shape detection
+        if (Math.abs(x) < 2 && y >= -20 && y <= 20) return true; // body
+        
+        // Upper wings
+        if (y < -5 && y > -25) {
+            const wingWidth = Math.sin(Math.abs(y + 5) / 18 * Math.PI) * 25;
+            if (Math.abs(x) < wingWidth) return true;
         }
         
-        return shape;
+        // Lower wings
+        if (y > 5 && y < 25) {
+            const wingWidth = Math.sin((25 - y) / 15 * Math.PI) * 20;
+            if (Math.abs(x) < wingWidth) return true;
+        }
+        
+        return false;
+    }
+    
+    getBirdShape() {
+        const outline = [];
+        const fill = [];
+        
+        // Bird body outline - thick line
+        for (let i = -15; i <= 15; i += 0.5) {
+            outline.push({x: i, y: 3});
+            outline.push({x: i, y: 2});
+            outline.push({x: i, y: 1});
+            outline.push({x: i, y: 0});
+            outline.push({x: i, y: -1});
+            outline.push({x: i, y: -2});
+            outline.push({x: i, y: -3});
+        }
+        
+        // Left wing outline - detailed
+        for (let i = 0; i <= 40; i++) {
+            const x = -18 + i * 0.8;
+            const y = -Math.abs(x + 2) * 0.5 - 10;
+            outline.push({x: x, y: y});
+            outline.push({x: x, y: y + 1}); // Thicker
+            outline.push({x: x, y: y - 1});
+        }
+        
+        // Right wing outline  
+        for (let i = 0; i <= 40; i++) {
+            const x = -2 + i * 0.8;
+            const y = -Math.abs(x - 2) * 0.5 - 10;
+            outline.push({x: x, y: y});
+            outline.push({x: x, y: y + 1}); // Thicker
+            outline.push({x: x, y: y - 1});
+        }
+        
+        // Head outline - thick circle
+        for (let i = 0; i <= 40; i++) {
+            const angle = (i / 40) * Math.PI * 2;
+            const x = Math.cos(angle) * 7 + 18;
+            const y = Math.sin(angle) * 7;
+            outline.push({x: x, y: y});
+            outline.push({x: x + 1, y: y}); // Thicker
+            outline.push({x: x - 1, y: y});
+        }
+        
+        // Beak - thick triangle
+        const beakPoints = [
+            {x: 25, y: 0}, {x: 26, y: 0}, {x: 27, y: 0},
+            {x: 24, y: 1}, {x: 25, y: 1}, {x: 26, y: 1},
+            {x: 24, y: -1}, {x: 25, y: -1}, {x: 26, y: -1}
+        ];
+        beakPoints.forEach(p => outline.push(p));
+        
+        // Tail feathers - defined lines
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 3; j++) {
+                outline.push({x: -18 - i * 1.5, y: (i * 0.8) - 3 + j});
+                outline.push({x: -18 - i * 1.5, y: -(i * 0.8) + 3 - j});
+            }
+        }
+        
+        // Eye
+        outline.push({x: 20, y: 2});
+        outline.push({x: 20, y: 1});
+        outline.push({x: 19, y: 2});
+        
+        // Minimal fill - just body center
+        for (let x = -10; x <= 10; x += 4) {
+            for (let y = -1; y <= 1; y += 1) {
+                fill.push({x: x, y: y});
+            }
+        }
+        
+        return {outline, fill};
+    }
+    
+    isInsideBird(x, y) {
+        // Body
+        if (x >= -12 && x <= 12 && Math.abs(y) <= 2) return true;
+        
+        // Head
+        const headDist = Math.sqrt((x - 15) * (x - 15) + y * y);
+        if (headDist <= 5) return true;
+        
+        // Wings
+        if (x >= -15 && x <= 15 && y <= -4 && y >= -Math.abs(x) * 0.4 - 8) return true;
+        
+        return false;
+    }
+    
+    getFishShape() {
+        const outline = [];
+        const fill = [];
+        
+        // Fish body outline - top
+        for (let i = -15; i <= 15; i += 1) {
+            const width = 8 - Math.abs(i) * 0.25;
+            outline.push({x: i, y: width});
+            outline.push({x: i, y: -width});
+        }
+        
+        // Tail outline
+        const tailPoints = [
+            {x: -20, y: 8}, {x: -25, y: 12}, {x: -28, y: 8}, {x: -30, y: 0},
+            {x: -28, y: -8}, {x: -25, y: -12}, {x: -20, y: -8}
+        ];
+        tailPoints.forEach(point => outline.push(point));
+        
+        // Head (rounded)
+        for (let i = 0; i <= 15; i++) {
+            const angle = (i / 15) * Math.PI;
+            const radius = 8;
+            outline.push({x: 15 + Math.cos(angle) * radius, y: Math.sin(angle) * radius});
+            outline.push({x: 15 + Math.cos(angle) * radius, y: -Math.sin(angle) * radius});
+        }
+        
+        // Fins
+        const finPoints = [
+            {x: 5, y: 12}, {x: 8, y: 15}, {x: 10, y: 12},
+            {x: 5, y: -12}, {x: 8, y: -15}, {x: 10, y: -12},
+            {x: -5, y: 10}, {x: -8, y: 13}, {x: -10, y: 10},
+            {x: -5, y: -10}, {x: -8, y: -13}, {x: -10, y: -10}
+        ];
+        finPoints.forEach(point => outline.push(point));
+        
+        // Fill points
+        for (let x = -25; x <= 20; x += 3) {
+            for (let y = -12; y <= 12; y += 3) {
+                if (this.isInsideFish(x, y)) {
+                    fill.push({x: x, y: y});
+                }
+            }
+        }
+        
+        return {outline, fill};
+    }
+    
+    isInsideFish(x, y) {
+        // Main body
+        if (x >= -15 && x <= 15) {
+            const width = 8 - Math.abs(x) * 0.25;
+            if (Math.abs(y) <= width) return true;
+        }
+        
+        // Head
+        const headDist = Math.sqrt((x - 15) * (x - 15) + y * y);
+        if (headDist <= 7) return true;
+        
+        // Tail area
+        if (x >= -25 && x <= -15 && Math.abs(y) <= 8) return true;
+        
+        return false;
     }
     
     getStarShape() {
-        const shape = [];
+        const outline = [];
+        const fill = [];
         const points = 5;
-        const outerRadius = 20;
-        const innerRadius = 8;
+        const outerRadius = 22;
+        const innerRadius = 9;
         
-        for (let i = 0; i < points * 2; i++) {
-            const angle = (i / (points * 2)) * Math.PI * 2;
+        // Star outline - connect all points
+        for (let i = 0; i <= points * 2; i++) {
+            const angle = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
             const radius = i % 2 === 0 ? outerRadius : innerRadius;
+            outline.push({
+                x: Math.cos(angle) * radius,
+                y: Math.sin(angle) * radius
+            });
+        }
+        
+        // Add more density to outline by interpolating between points
+        for (let i = 0; i < points * 2; i++) {
+            const angle1 = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
+            const angle2 = ((i + 1) / (points * 2)) * Math.PI * 2 - Math.PI / 2;
+            const radius1 = i % 2 === 0 ? outerRadius : innerRadius;
+            const radius2 = (i + 1) % 2 === 0 ? outerRadius : innerRadius;
             
-            // Fill the star shape
-            for (let r = 0; r <= radius; r += 2) {
-                shape.push({
-                    x: Math.cos(angle) * r,
-                    y: Math.sin(angle) * r
+            for (let t = 0.1; t < 1; t += 0.1) {
+                const angle = angle1 + (angle2 - angle1) * t;
+                const radius = radius1 + (radius2 - radius1) * t;
+                outline.push({
+                    x: Math.cos(angle) * radius,
+                    y: Math.sin(angle) * radius
                 });
             }
         }
         
-        return shape;
+        // Fill points
+        for (let x = -20; x <= 20; x += 3) {
+            for (let y = -20; y <= 20; y += 3) {
+                if (this.isInsideStar(x, y, outerRadius, innerRadius)) {
+                    fill.push({x: x, y: y});
+                }
+            }
+        }
+        
+        return {outline, fill};
+    }
+    
+    isInsideStar(x, y, outerRadius, innerRadius) {
+        const distance = Math.sqrt(x * x + y * y);
+        let angle = Math.atan2(y, x) + Math.PI / 2;
+        if (angle < 0) angle += Math.PI * 2;
+        
+        const segmentAngle = (Math.PI * 2) / 10; // 10 segments (5 points * 2)
+        const segmentIndex = Math.floor(angle / segmentAngle);
+        const localAngle = angle - segmentIndex * segmentAngle;
+        
+        const isOuterSegment = segmentIndex % 2 === 0;
+        const maxRadius = isOuterSegment ? outerRadius : 
+            innerRadius + (outerRadius - innerRadius) * (1 - Math.abs(localAngle - segmentAngle / 2) / (segmentAngle / 2));
+        
+        return distance <= maxRadius;
     }
     
     getHeartShape() {
-        const shape = [];
-        const scale = 0.5;
+        const outline = [];
+        const fill = [];
+        const scale = 0.8;
         
-        for (let i = 0; i < 100; i++) {
-            const t = (i / 99) * Math.PI * 2;
+        // Heart outline - more detailed
+        for (let i = 0; i <= 150; i++) {
+            const t = (i / 150) * Math.PI * 2;
             const x = 16 * Math.pow(Math.sin(t), 3) * scale;
             const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * scale;
-            shape.push({x: x, y: y});
+            outline.push({x: x, y: y});
         }
         
-        return shape;
+        // Fill points
+        for (let x = -15; x <= 15; x += 2) {
+            for (let y = -8; y <= 12; y += 2) {
+                if (this.isInsideHeart(x, y, scale)) {
+                    fill.push({x: x, y: y});
+                }
+            }
+        }
+        
+        return {outline, fill};
+    }
+    
+    isInsideHeart(x, y, scale) {
+        // Heart equation: ((x/a)^2 + (y/b)^2 - 1)^3 - (x/a)^2 * (y/b)^3 = 0
+        // Simplified approximation for our purposes
+        const normalizedX = x / scale;
+        const normalizedY = y / scale;
+        
+        // Check if point is inside heart shape bounds
+        if (normalizedY > 15 || normalizedY < -10) return false;
+        
+        // Upper part (two circles)
+        if (normalizedY > 0) {
+            const leftCircle = (normalizedX + 6) * (normalizedX + 6) + (normalizedY - 6) * (normalizedY - 6);
+            const rightCircle = (normalizedX - 6) * (normalizedX - 6) + (normalizedY - 6) * (normalizedY - 6);
+            return leftCircle <= 36 || rightCircle <= 36;
+        }
+        
+        // Lower part (triangle-like)
+        const bottomWidth = 16 - Math.abs(normalizedY) * 1.2;
+        return Math.abs(normalizedX) <= bottomWidth;
     }
     
     draw(ctx) {
@@ -310,8 +598,18 @@ class Firework {
                 const alpha = particle.life / particle.maxLife;
                 ctx.globalAlpha = alpha;
                 ctx.fillStyle = particle.color;
-                ctx.shadowBlur = 5;
-                ctx.shadowColor = particle.color;
+                
+                // Much stronger glow for outline particles
+                if (particle.isOutline) {
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = particle.color;
+                    ctx.globalCompositeOperation = 'screen'; // Brighter blend mode
+                } else {
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = particle.color;
+                    ctx.globalCompositeOperation = 'source-over';
+                }
+                
                 ctx.beginPath();
                 ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -330,6 +628,11 @@ const canvas = document.getElementById('fireworkCanvas');
 const ctx = canvas.getContext('2d');
 const fireworks = [];
 
+// Performance settings
+const MAX_TOTAL_PARTICLES = 2000; // Global particle limit
+const MAX_FIREWORKS = 8; // Maximum fireworks on screen
+let totalParticleCount = 0;
+
 // Set canvas size
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -339,11 +642,30 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// Animation loop
+// Animation loop with performance monitoring
 function animate() {
     // Clear canvas with fade effect
     ctx.fillStyle = 'rgba(12, 12, 12, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Count total particles for performance monitoring
+    totalParticleCount = 0;
+    for (let firework of fireworks) {
+        totalParticleCount += firework.particles.length;
+    }
+    
+    // Remove oldest fireworks if we exceed limits
+    while (fireworks.length > MAX_FIREWORKS || totalParticleCount > MAX_TOTAL_PARTICLES) {
+        if (fireworks.length > 0) {
+            fireworks.shift(); // Remove oldest firework
+            totalParticleCount = 0;
+            for (let firework of fireworks) {
+                totalParticleCount += firework.particles.length;
+            }
+        } else {
+            break;
+        }
+    }
     
     // Update and draw fireworks
     for (let i = fireworks.length - 1; i >= 0; i--) {
@@ -358,8 +680,13 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// Create firework function
+// Create firework function with performance check
 function createFirework(x, y, type = 'normal') {
+    // Performance check - don't create if too many particles
+    if (totalParticleCount > MAX_TOTAL_PARTICLES * 0.8) {
+        return; // Skip creating new firework if approaching limit
+    }
+    
     if (!x || !y) {
         x = Math.random() * canvas.width;
         y = Math.random() * canvas.height * 0.5 + canvas.height * 0.1;
